@@ -51,6 +51,9 @@ class MenuScene extends Phaser.Scene {
     this.startButton = this.add.sprite(1920 / 2, 1080 / 2 + 100, 'startButton')
     this.startButton.setInteractive({ useHandCursor: true })
     this.startButton.on('pointerdown', () => this.clickButton())
+
+    // Start game if any key is pressed
+    this.input.keyboard.on('keydown', () => this.clickButton())
   }
 
   /**
