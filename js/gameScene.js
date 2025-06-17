@@ -12,6 +12,7 @@ class GameScene extends Phaser.Scene {
     this.dino = null
     this.obstacles = null
     this.clouds = null
+    this.floor = null
 
     // UI and score
     this.score = 0
@@ -59,8 +60,15 @@ class GameScene extends Phaser.Scene {
     this.scoreTextStyle = { font: '65px Arial', fill: '#000000', align: 'center' }
     this.gameOverTextStyle = { font: '65px Arial', fill: '#ff0000', align: 'center' }
 
-    // Set up dino at ground level and running animation
+    // Add an invisible static physics body as the floor
     const groundY = this.scale.height - 10
+    this.floor = this.physics.add.staticGroup()
+    this.floor.create(this.scale.width / 2, groundY + 1, null)
+      .setDisplaySize(this.scale.width, 10)
+      .setVisible(false)
+      .refreshBody()
+
+    // Set up dino at ground level and running animation
     this.dino = this.physics.add.sprite(150, groundY, 'running1')
     this.dino.setOrigin(0.5, 1)
     this.dino.setCollideWorldBounds(true)
@@ -99,6 +107,8 @@ class GameScene extends Phaser.Scene {
 
     // End game if dino collides with obstacle
     this.physics.add.collider(this.dino, this.obstacles, this.gameOverSequence, null, this)
+    // Add collider between dino and floor
+    this.physics.add.collider(this.dino, this.floor)
 
     // Listen for jump input
     this.input.keyboard.on('keydown-SPACE', this.jump, this)
@@ -117,13 +127,6 @@ class GameScene extends Phaser.Scene {
 
   update () {
     if (this.gameOver) return
-
-    // Snap dino to ground if falling below
-    const groundY = this.scale.height - 10
-    if (this.dino.y > groundY && this.dino.body.velocity.y >= 0) {
-      this.dino.y = groundY
-      this.dino.setVelocityY(0)
-    }
 
     // Remove obstacles that have left the screen
     this.obstacles.children.iterate(obstacle => {
@@ -181,9 +184,8 @@ class GameScene extends Phaser.Scene {
   }
 
   jump () {
-    // Only jump if dino is on the ground
-    const groundY = this.scale.height - 10
-    if (this.dino.y >= groundY && this.dino.body.velocity.y === 0) {
+    // Only jump if dino is on the ground (touching floor)
+    if (this.dino.body.touching.down) {
       this.dino.setVelocityY(-900)
       this.sound.play('jump')
     }
