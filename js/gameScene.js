@@ -14,11 +14,13 @@ class GameScene extends Phaser.Scene {
     this.scoreText = null
     this.gameOver = false
     this.gameOverText = null
-    this.scoreTextStyle = { font: '65px Arial', fill: '#ffffff', align: 'center' }
+    this.scoreTextStyle = { font: '65px Arial', fill: '#000000', align: 'center' }
     this.gameOverTextStyle = { font: '65px Arial', fill: '#ff0000', align: 'center' }
     this.obstacleTimer = null
     this.dinoFrame = 0
     this.dinoAnimTimer = null
+    this.highScore = 0
+    this.highScoreText = null
   }
 
   init () {
@@ -57,7 +59,10 @@ class GameScene extends Phaser.Scene {
 
     this.obstacles = this.physics.add.group()
     this.score = 0
-    this.scoreText = this.add.text(10, 10, 'Score: 0', this.scoreTextStyle)
+    this.gameOver = false
+    // Score and High Score at top right
+    this.scoreText = this.add.text(this.scale.width - 30, 30, 'Score: 0', this.scoreTextStyle).setOrigin(1, 0)
+    this.highScoreText = this.add.text(this.scale.width - 30, 110, 'High: ' + Math.floor(this.highScore), this.scoreTextStyle).setOrigin(1, 0)
     this.physics.add.collider(this.dino, this.obstacles, this.gameOverSequence, null, this)
     this.input.keyboard.on('keydown-SPACE', this.jump, this)
     this.scheduleNextObstacle()
@@ -67,7 +72,8 @@ class GameScene extends Phaser.Scene {
     if (this.gameOver) return
 
     const groundY = this.scale.height - 10
-    if (this.dino.y > groundY) {
+    // Only snap to ground if dino is falling and below ground
+    if (this.dino.y > groundY && this.dino.body.velocity.y >= 0) {
       this.dino.y = groundY
       this.dino.setVelocityY(0)
     }
@@ -79,7 +85,12 @@ class GameScene extends Phaser.Scene {
     })
 
     this.score += 1
-    this.scoreText.setText('Score: ' + Math.floor(this.score / 10))
+    const displayScore = Math.floor(this.score / 10)
+    this.scoreText.setText('Score: ' + displayScore)
+    if (displayScore > this.highScore) {
+      this.highScore = displayScore
+      this.highScoreText.setText('High: ' + this.highScore)
+    }
   }
 
   jump () {
@@ -124,7 +135,6 @@ class GameScene extends Phaser.Scene {
     this.gameOverText = this.add.text(1920 / 2, 1080 / 2, 'Game Over!\nClick to play again.', this.gameOverTextStyle).setOrigin(0.5)
     this.gameOverText.setInteractive({ useHandCursor: true })
     this.gameOverText.on('pointerdown', () => this.scene.restart())
-    this.score = 0
   }
 }
 
