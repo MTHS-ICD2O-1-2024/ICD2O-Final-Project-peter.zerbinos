@@ -36,6 +36,7 @@ class GameScene extends Phaser.Scene {
     this.load.audio('jump', 'assets/jump.wav')
     this.load.audio('point', 'assets/point.wav')
     this.load.audio('die', 'assets/die.wav')
+    this.load.image('cloud', 'assets/cloud.png')
   }
 
   create () {
@@ -62,6 +63,7 @@ class GameScene extends Phaser.Scene {
     })
 
     this.obstacles = this.physics.add.group()
+    this.clouds = this.add.group()
     this.score = 0
     this.gameOver = false
     // Score and High Score at top right
@@ -71,6 +73,13 @@ class GameScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-SPACE', this.jump, this)
     this.scheduleNextObstacle()
     this.lastPointSoundScore = 0
+
+    this.spawnCloudTimer = this.time.addEvent({
+      delay: Phaser.Math.Between(1200, 2500),
+      callback: this.spawnCloud,
+      callbackScope: this,
+      loop: true
+    })
   }
 
   update () {
@@ -86,6 +95,16 @@ class GameScene extends Phaser.Scene {
     this.obstacles.children.iterate(obstacle => {
       if (obstacle && obstacle.x < -50) {
         obstacle.destroy()
+      }
+    })
+
+    // Move clouds and destroy if off screen
+    this.clouds.children.iterate(cloud => {
+      if (cloud) {
+        cloud.x += cloud.speed
+        if (cloud.x < -cloud.width) {
+          cloud.destroy()
+        }
       }
     })
 
@@ -120,6 +139,21 @@ class GameScene extends Phaser.Scene {
     obstacle.setImmovable(true)
     obstacle.body.allowGravity = false
     this.scheduleNextObstacle()
+  }
+
+  spawnCloud () {
+    const y = Phaser.Math.Between(50, this.scale.height / 2)
+    const cloud = this.add.image(this.scale.width + 100, y, 'cloud')
+    cloud.setDepth(-1)
+    cloud.speed = -Phaser.Math.Between(1, 3) // slow speed
+    this.clouds.add(cloud)
+    // Randomize next spawn
+    this.spawnCloudTimer.reset({
+      delay: Phaser.Math.Between(1200, 2500),
+      callback: this.spawnCloud,
+      callbackScope: this,
+      loop: true
+    })
   }
 
   scheduleNextObstacle () {
