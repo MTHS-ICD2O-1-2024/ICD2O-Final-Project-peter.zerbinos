@@ -24,6 +24,8 @@ class GameScene extends Phaser.Scene {
     this.lastPointSoundScore = 0
     this.clouds = null
     this.spawnCloudTimer = null
+    this.isDarkMode = false // Track background mode
+    this.lastModeSwitchScore = 0 // Track last score at which mode switched
   }
 
   init () {
@@ -43,6 +45,13 @@ class GameScene extends Phaser.Scene {
   }
 
   create () {
+    // Always start in light mode
+    this.isDarkMode = false
+    this.lastModeSwitchScore = 0
+    this.cameras.main.setBackgroundColor('#ffffff')
+    this.scoreTextStyle = { font: '65px Arial', fill: '#000000', align: 'center' }
+    this.gameOverTextStyle = { font: '65px Arial', fill: '#ff0000', align: 'center' }
+
     // Set up dino at ground level and running animation
     const groundY = this.scale.height - 10
     this.dino = this.physics.add.sprite(150, groundY, 'running1')
@@ -120,6 +129,26 @@ class GameScene extends Phaser.Scene {
     if (displayScore > 0 && displayScore % 50 === 0 && this.lastPointSoundScore !== displayScore) {
       this.sound.play('point')
       this.lastPointSoundScore = displayScore
+    }
+
+    // Alternate background and text color every 100 points, with fade effect
+    if (displayScore > 0 && displayScore % 100 === 0 && this.lastModeSwitchScore !== displayScore) {
+      this.isDarkMode = !this.isDarkMode
+      this.lastModeSwitchScore = displayScore
+      // Fade out, then change background and text color, then fade in
+      this.cameras.main.fadeOut(500, 0, 0, 0)
+      this.cameras.main.once('camerafadeoutcomplete', () => {
+        if (this.isDarkMode) {
+          this.cameras.main.setBackgroundColor('#000000')
+          this.scoreText.setStyle({ fill: '#ffffff' })
+          this.highScoreText.setStyle({ fill: '#ffffff' })
+        } else {
+          this.cameras.main.setBackgroundColor('#ffffff')
+          this.scoreText.setStyle({ fill: '#000000' })
+          this.highScoreText.setStyle({ fill: '#000000' })
+        }
+        this.cameras.main.fadeIn(500, 0, 0, 0)
+      })
     }
 
     // Move clouds and destroy if off screen
