@@ -27,7 +27,7 @@ class GameScene extends Phaser.Scene {
   }
 
   init () {
-    this.cameras.main.setBackgroundColor('#ffffff')
+    this.cameras.main.setBackgroundColor('#000000')
   }
 
   preload () {
