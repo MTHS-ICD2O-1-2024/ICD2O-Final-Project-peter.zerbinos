@@ -21,6 +21,7 @@ class GameScene extends Phaser.Scene {
     this.dinoAnimTimer = null
     this.highScore = 0
     this.highScoreText = null
+    this.lastPointSoundScore = 0
   }
 
   init () {
@@ -32,6 +33,9 @@ class GameScene extends Phaser.Scene {
     this.load.image('running2', 'assets/running2.png')
     this.load.image('oneCactus', 'assets/oneCactus.png')
     this.load.image('multiCactus', 'assets/multiCactus.png')
+    this.load.audio('jump', 'assets/jump.wav')
+    this.load.audio('point', 'assets/point.wav')
+    this.load.audio('die', 'assets/die.wav')
   }
 
   create () {
@@ -66,6 +70,7 @@ class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.dino, this.obstacles, this.gameOverSequence, null, this)
     this.input.keyboard.on('keydown-SPACE', this.jump, this)
     this.scheduleNextObstacle()
+    this.lastPointSoundScore = 0
   }
 
   update () {
@@ -91,12 +96,18 @@ class GameScene extends Phaser.Scene {
       this.highScore = displayScore
       this.highScoreText.setText('High: ' + this.highScore)
     }
+    // Play point.wav every 50 points
+    if (displayScore > 0 && displayScore % 50 === 0 && this.lastPointSoundScore !== displayScore) {
+      this.sound.play('point')
+      this.lastPointSoundScore = displayScore
+    }
   }
 
   jump () {
     const groundY = this.scale.height - 10
     if (this.dino.y >= groundY && this.dino.body.velocity.y === 0) {
       this.dino.setVelocityY(-900)
+      this.sound.play('jump')
     }
   }
 
@@ -128,6 +139,7 @@ class GameScene extends Phaser.Scene {
     this.gameOver = true
     this.physics.pause()
     this.dino.setTint(0xff0000)
+    this.sound.play('die')
     if (this.dinoAnimTimer) {
       this.dinoAnimTimer.remove(false)
       this.dinoAnimTimer = null
