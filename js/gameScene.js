@@ -58,8 +58,9 @@ class GameScene extends Phaser.Scene {
     this.dino.setOrigin(0.5, 1)
     this.dino.setCollideWorldBounds(true)
     this.dino.setGravityY(2000)
-    this.dino.body.setSize(this.dino.width, this.dino.height)
-    this.dino.body.setOffset(0, 0)
+    // Make hitbox smaller for more forgiving collisions
+    this.dino.body.setSize(this.dino.width * 0.6, this.dino.height * 0.7)
+    this.dino.body.setOffset(this.dino.width * 0.2, this.dino.height * 0.3)
 
     // Dino running animation timer
     this.dinoFrame = 0
