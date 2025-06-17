@@ -5,7 +5,7 @@
 // This is the Game Scene
 
 class GameScene extends Phaser.Scene {
-  constructor() {
+  constructor () {
     super({ key: 'gameScene' })
 
     this.dino = null
@@ -21,18 +21,18 @@ class GameScene extends Phaser.Scene {
     this.dinoAnimTimer = null
   }
 
-  init() {
+  init () {
     this.cameras.main.setBackgroundColor('#ffffff')
   }
 
-  preload() {
+  preload () {
     this.load.image('running1', 'assets/running1.png')
     this.load.image('running2', 'assets/running2.png')
     this.load.image('oneCactus', 'assets/oneCactus.png')
     this.load.image('multiCactus', 'assets/multiCactus.png')
   }
 
-  create() {
+  create () {
     const groundY = this.scale.height - 10
     this.dino = this.physics.add.sprite(150, groundY, 'running1')
     this.dino.setOrigin(0.5, 1)
@@ -63,7 +63,7 @@ class GameScene extends Phaser.Scene {
     this.scheduleNextObstacle()
   }
 
-  update() {
+  update () {
     if (this.gameOver) return
 
     const groundY = this.scale.height - 10
@@ -82,14 +82,14 @@ class GameScene extends Phaser.Scene {
     this.scoreText.setText('Score: ' + Math.floor(this.score / 10))
   }
 
-  jump() {
+  jump () {
     const groundY = this.scale.height - 10
     if (this.dino.y >= groundY && this.dino.body.velocity.y === 0) {
       this.dino.setVelocityY(-900)
     }
   }
 
-  spawnObstacle() {
+  spawnObstacle () {
     const groundY = this.scale.height - 10
     const cactusType = Phaser.Math.Between(0, 1) === 0 ? 'oneCactus' : 'multiCactus'
     const obstacle = this.obstacles.create(2000, groundY, cactusType)
@@ -100,7 +100,7 @@ class GameScene extends Phaser.Scene {
     this.scheduleNextObstacle()
   }
 
-  scheduleNextObstacle() {
+  scheduleNextObstacle () {
     const delay = Phaser.Math.Between(700, 1800)
     if (this.obstacleTimer) {
       this.obstacleTimer.remove(false)
@@ -113,7 +113,7 @@ class GameScene extends Phaser.Scene {
     })
   }
 
-  gameOverSequence() {
+  gameOverSequence () {
     this.gameOver = true
     this.physics.pause()
     this.dino.setTint(0xff0000)
